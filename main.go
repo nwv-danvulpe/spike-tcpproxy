@@ -34,7 +34,7 @@ func main() {
 			log.Printf("failed connecting to: %v: %v", src.RemoteAddr(), dstDialErr)
 			connectionErrorCounter.Inc()
 		},
-		ProxyProtocolVersion: 2,
+		ProxyProtocolVersion: 0,
 	}
 	proxy.AddRoute(":8000", dstTarget)
 	go createPrometheusEndpoint()
