@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/inetaf/tcpproxy"
+	"github.com/pires/go-proxyproto"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
@@ -25,7 +26,18 @@ func init() {
 }
 
 func main() {
-	proxy := &tcpproxy.Proxy{}
+	list, err := net.Listen("tcp", ":8000")
+	if err != nil {
+		log.Fatalf("could not listen: %v", err)
+	}
+	listener := &proxyproto.Listener{
+		Listener: list,
+	}
+	proxy := &tcpproxy.Proxy{
+		ListenFunc: func(net, laddr string) (net.Listener, error) {
+			return listener, nil
+		},
+	}
 	dstTarget := &tcpproxy.DialProxy{
 		Addr:            os.Getenv("REMOTE_ADDR"),
 		KeepAlivePeriod: -1,
@@ -34,7 +46,7 @@ func main() {
 			log.Printf("failed connecting to: %v: %v", src.RemoteAddr(), dstDialErr)
 			connectionErrorCounter.Inc()
 		},
-		ProxyProtocolVersion: 0,
+		ProxyProtocolVersion: 2,
 	}
 	proxy.AddRoute(":8000", dstTarget)
 	go createPrometheusEndpoint()
