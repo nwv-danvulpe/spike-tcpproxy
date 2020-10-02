@@ -40,7 +40,7 @@ func main() {
 	}
 	dstTarget := &tcpproxy.DialProxy{
 		Addr:            os.Getenv("REMOTE_ADDR"),
-		KeepAlivePeriod: -1,
+		KeepAlivePeriod: time.Minute,
 		DialTimeout:     5 * time.Second,
 		OnDialError: func(src net.Conn, dstDialErr error) {
 			log.Printf("failed connecting to: %v: %v", src.RemoteAddr(), dstDialErr)
